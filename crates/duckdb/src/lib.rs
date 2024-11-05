@@ -395,6 +395,13 @@ impl Connection {
         unsafe { ffi::duckdb_interrupt(self.db.borrow().con) };
     }
 
+    #[inline]
+    pub fn interrupt_handle(&self) -> InterruptHandle {
+        InterruptHandle {
+            con: self.db.borrow().con,
+        }
+    }
+
     /// Returns the path to the database file, if one exists and is known.
     #[inline]
     pub fn path(&self) -> Option<&Path> {
@@ -583,6 +590,19 @@ impl fmt::Debug for Connection {
         f.debug_struct("Connection").field("path", &self.path).finish()
     }
 }
+
+pub struct InterruptHandle {
+    con: ffi::duckdb_connection,
+}
+impl InterruptHandle {
+    #[inline]
+    pub fn interrupt(&self) {
+        unsafe { ffi::duckdb_interrupt(self.con) };
+    }
+}
+
+unsafe impl Send for InterruptHandle {}
+unsafe impl Sync for InterruptHandle {}
 
 #[cfg(doctest)]
 doc_comment::doctest!("../../../README.md");
