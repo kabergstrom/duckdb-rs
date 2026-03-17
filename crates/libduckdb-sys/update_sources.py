@@ -39,9 +39,15 @@ def get_sources(extensions):
     )
 
     # Remove the absolute prefix on the files (some get generated with it)
+    # Normalize path separators for consistent comparison (Windows python may mix / and \)
+    norm_script_dir = os.path.normpath(SCRIPT_DIR)
     source_list = [
-        x[len(SCRIPT_DIR) + 1 :] if x.startswith(SCRIPT_DIR) else x for x in source_list
+        os.path.normpath(x)[len(norm_script_dir) + 1 :] if os.path.normpath(x).startswith(norm_script_dir) else x for x in source_list
     ]
+
+    # Use forward slashes for cross-platform compatibility in manifest.json
+    source_list = [x.replace('\\', '/') for x in source_list]
+    include_list = [x.replace('\\', '/') for x in include_list]
 
     return set(source_list), set(include_list)
 
